@@ -133,7 +133,7 @@ class MoipClient implements MoipHttpClient {
             return $response->getBody()->getContents();
         }catch(RequestException $e){
             if ($e->hasResponse()) {
-                return array('error'=>true, 'alerts'=>listErrors( Psr7\str($e->getResponse())));
+                return array('error'=>true, 'alerts'=>$this->prettyErrors( Psr7\str($e->getResponse())));
             }
         }
     }
@@ -153,7 +153,7 @@ class MoipClient implements MoipHttpClient {
             return $response->getBody()->getContents();
         }catch(RequestException $e){
             if ($e->hasResponse()) {
-                return array('error'=>true, 'alerts'=>listErrors( Psr7\str($e->getResponse())));
+                return array('error'=>true, 'alerts'=>$this->prettyErrors( Psr7\str($e->getResponse())));
             }
         }
     }
@@ -193,7 +193,7 @@ class MoipClient implements MoipHttpClient {
             return $response->getBody()->getContents();
         }catch(RequestException $e){
             if ($e->hasResponse()) {
-                return array('error'=>true, 'alerts'=>listErrors( Psr7\str($e->getResponse())));
+                return array('error'=>true, 'alerts'=>$this->prettyErrors( Psr7\str($e->getResponse())));
             }
         }
     }
