@@ -1,5 +1,7 @@
 <?php namespace Prettus\Moip\Subscription;
 
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Psr\Http\Message\ResponseInterface;
@@ -126,8 +128,14 @@ class MoipClient implements MoipHttpClient {
      */
     public function get($url = null, $options = [])
     {
-        $response = $this->client->get($url, $this->getOptions($options));
-        return $response->getBody()->getContents();
+        try{
+            $response = $this->client->get($url, $this->getOptions($options));
+            return $response->getBody()->getContents();
+        }catch(RequestException $e){
+            if ($e->hasResponse()) {
+                return array('error'=>true, 'alerts'=>listErrors( Psr7\str($e->getResponse())));
+            }
+        }
     }
 
     /**
@@ -140,8 +148,14 @@ class MoipClient implements MoipHttpClient {
      */
     public function post($url = null, $options = [])
     {
-        $response = $this->client->post($url, $this->getOptions($options));
-        return $response->getBody()->getContents();
+        try{
+            $response = $this->client->post($url, $this->getOptions($options));
+            return $response->getBody()->getContents();
+        }catch(RequestException $e){
+            if ($e->hasResponse()) {
+                return array('error'=>true, 'alerts'=>listErrors( Psr7\str($e->getResponse())));
+            }
+        }
     }
 
     /**
@@ -154,8 +168,14 @@ class MoipClient implements MoipHttpClient {
      */
     public function put($url = null, $options = [])
     {
-        $response = $this->client->put($url, $this->getOptions($options) );
-        return $response->getBody()->getContents();
+        try{
+           $response = $this->client->put($url, $this->getOptions($options) );
+            return $response->getBody()->getContents();
+        }catch(RequestException $e){
+            if ($e->hasResponse()) {
+                return array('error'=>true, 'alerts'=>$this->prettyErrors( Psr7\str($e->getResponse())));
+            }
+        }
     }
 
     /**
@@ -168,8 +188,14 @@ class MoipClient implements MoipHttpClient {
      */
     public function delete($url = null, $options = [])
     {
-        $response = $this->client->delete($url, $this->getOptions($options));
-        return $response->getBody()->getContents();
+        try{
+           $response = $this->client->delete($url, $this->getOptions($options));
+            return $response->getBody()->getContents();
+        }catch(RequestException $e){
+            if ($e->hasResponse()) {
+                return array('error'=>true, 'alerts'=>listErrors( Psr7\str($e->getResponse())));
+            }
+        }
     }
 
     /**
@@ -178,5 +204,20 @@ class MoipClient implements MoipHttpClient {
      */
     public function getOptions($options = []){
         return array_merge($this->requestOptions, $options);
+    }
+
+    /**
+     * @param string $mixed
+     * @return Html ul>li
+     */
+    public function prettyErrors( $errors ){
+        $start = strpos($errors, '{');
+        $end = strpos($errors, "}]}");
+        $errors = json_decode(substr($errors, $start, ($end-$start)+3));
+        $listErrors = array();
+        foreach($errors->errors as $erro){
+            $listErrors[] = $erro->description;
+        }
+        return \Html::ul($listErrors);
     }
 }
